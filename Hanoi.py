@@ -1,6 +1,6 @@
 import os
 
-class Board(object):
+class GameBoard(object):
 
 	def __init__(self, NumDisks):
 		self.NumDisks = NumDisks
@@ -8,7 +8,7 @@ class Board(object):
 		self.postwidth = 1 + 2 * self.maxradius # leave enough room for the center post plus the max radius of a disk on each side of the post
 		self.boardheight = self.maxradius + 1 # height of posts is enough for all disks on one post, plus one empty bit at the top
 
-	def StartGame(self):
+	def start_game(self):
 		#TODO:  need some doc strings for the most important methods?
 		#TODO:  change to the popular python method naming style for all methods
 		self.posts = []
@@ -21,31 +21,31 @@ class Board(object):
 		for disk in range (self.NumDisks, 0, -1):
 			self.posts[0].append(disk)
 	
-	def IsEndGame(self):
+	def is_end_game(self):
 		# are all disks on the rightmost post?
 		return len(self.posts[2]) == self.NumDisks
 			
-	def Print(self):
+	def _debug_print(self):
 		# debug method, show the contents of the posts
 		for i in range (0, 3):
 			print (self.posts[i])
 
-	def Show(self):
+	def show(self):
+		if debug: self._debug_print()
+
 		print ('')
 
 		# for each vertical text printing row in the board printout, print what is at each post, horizontally
 		for row in range(0, self.boardheight):
 			for post in range(0, 3):
-				self.ShowDisk(row, post)
+				self.show_disk(row, post)
 			print ('');
 
 		# at the bottom of the board, below the posts, show a base for the board
 		print ((self.postwidth * 3 + 2) * "-")
 		#TODO:  label the posts with the numbers that are valid for user input
 		
-		if debug: self.Print()
-
-	def ShowDisk(self, row, post):
+	def show_disk(self, row, post):
 		# if this post has enough disks to reach the current print row,
 		if row >= self.boardheight - len(self.posts[post]):
 			# then create a disk of proper width and center it on the post
@@ -57,11 +57,11 @@ class Board(object):
 			# this part of the post is empty, so show the post, centered in its space
 			print " " * self.maxradius + "|" + " " * self.maxradius,
 		
-	def MoveDisk(self, frompost, topost):
-		if debug: print ("call MoveDisk: ", frompost, topost)
+	def move_disk(self, frompost, topost):
+		if debug: print ("call move_disk: ", frompost, topost)
 		
 		# check for a disk, if any, and its size, at the top of the stack on the "from" post
-		disk = self.TopDiskSize(frompost)
+		disk = self.top_disk_size(frompost)
 		
 		if debug: print ("return: ", disk)
 		
@@ -70,7 +70,7 @@ class Board(object):
 			return False
 
 		# check the size of the disk (if any) at the top of the stack on the "to" post
-		topdisk = self.TopDiskSize(topost)
+		topdisk = self.top_disk_size(topost)
 		
 		if debug: print ("return: ", topdisk)
 
@@ -83,12 +83,10 @@ class Board(object):
 		self.posts[frompost].pop()
 		self.posts[topost].append(disk)
 		
-		if debug: self.Print()
-		
 		# signal a successful move (no errors) so the caller can redraw the new board position
 		return True
 
-	def TopDiskSize(self, post):
+	def top_disk_size(self, post):
 		if debug: print ("call TopDisk: ", post)
 
 		# find the top disk on the post
@@ -102,7 +100,7 @@ class Board(object):
 		# no disk was found on the post
 		return None
 	
-def InputOrQuit(prompt, min=None, max=None):
+def input_or_quit(prompt, min=None, max=None):
 
 	amount = None
 
@@ -123,50 +121,55 @@ def InputOrQuit(prompt, min=None, max=None):
 	
 	return amount
 
-def ClearScreen():
+def clear_screen():
 	os.system('cls' if os.name == 'nt' else 'clear')
 	
 
 # MAIN GAME LOGIC
-#if name == "__main__":
 
-# TODO: make debug (informational output) mode an optional command line option
-# TODO: make number-of-disks required input an optional command line
-#	argument that skips prompt
 
-debug = False
+if __name__ == "__main__":
 
-ClearScreen()
+	# TODO: make debug (informational output) mode an optional command line option
+	# TODO: make number-of-disks required input an optional command line
+	#	argument that skips prompt
 
-#TODO:  add zero player mode:  computer solves the game itself, with recursion
-#			(disable clear-screen so user can scroll back and see computer's solution!)
-#TODO:  add two player mode:  saves the board and next-player ID somewhere and
-#			each player's session watches for their turn
-#		add multi-player mode?
+	debug = False
 
-print "\n\nLet's play!"
-numdisks = InputOrQuit("How many disks (q to quit)? ", 1, 16)
+	clear_screen()
 
-#TODO:  move board initialization and game turn loop into a method in board class,
-#TODO:		so main program is super simple!	
-board = Board(numdisks)
+	#TODO:  add zero player mode:  computer solves the game itself, with recursion
+	#			(disable clear-screen so user can scroll back and see computer's solution!)
+	#TODO:  add two player mode:  saves the board and next-player ID somewhere and
+	#			each player's session watches for their turn
+	#		add multi-player mode?
+
+	print "\n\nLet's play!"
+	numdisks = input_or_quit("How many disks (q to quit)? ", 1, 16)
+
+	#TODO:  move board initialization and game turn loop into a method in board class,
+	#TODO:		so main program is super simple!  (board.start_game() would become game.start(), etc.)	
+	board = GameBoard(numdisks)
 	
-board.StartGame()
+	board.start_game()
 
-ClearScreen()
-board.Show()
+	clear_screen()
+	board.show()
 
-while (not board.IsEndGame()):
+	while (not board.is_end_game()):
 
-	frompost = InputOrQuit("From post (q to quit)? ", 1, 3) - 1
-	topost = InputOrQuit("To post (q to quit)? ", 1, 3) - 1
+		frompost = input_or_quit("From post (q to quit)? ", 1, 3) - 1
+		topost = input_or_quit("To post (q to quit)? ", 1, 3) - 1
 
-	ClearScreen()
+		clear_screen()
 	
-	board.MoveDisk(frompost, topost)
-	board.Show()
+		board.move_disk(frompost, topost)
+		board.show()
 
-print "\n","*" * 20, "You did it!\n"
+	print "\n","*" * 20, "You did it!\n"
 	
-print ("Thanks for playing!\n\n")
-exit(0)
+	print ("Thanks for playing!\n\n")
+	exit(0)
+	
+else:
+	debug = True # debug mode on if we imported Hanoi to play with it in interactive mode
