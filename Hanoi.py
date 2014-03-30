@@ -5,72 +5,72 @@ class GameBoard(object):
 	def __init__(self, NumDisks):
 		self.NumDisks = NumDisks
 		self.maxradius = self.NumDisks; # disk radius: disk "1" is actually 3 characters wide including its center; disk 2 is 5 characters wide, etc.
-		self.postwidth = 1 + 2 * self.maxradius # leave enough room for the center post plus the max radius of a disk on each side of the post
-		self.boardheight = self.maxradius + 1 # height of posts is enough for all disks on one post, plus one empty bit at the top
+		self.towerwidth = 1 + 2 * self.maxradius # leave enough room for the center tower plus the max radius of a disk on each side of the tower
+		self.boardheight = self.maxradius + 1 # height of towers is enough for all disks on one tower, plus one empty bit at the top
 
 	def start_game(self):
 		#TODO:  need some doc strings for the most important methods?
 		#TODO:  change to the popular python method naming style for all methods
-		self.posts = []
+		self.towers = []
 
-		# game board is three posts, each can have a varying number of "disk IDs" on it, starting at the bottom of the stack
-		for post in range (0, 3):
-			self.posts.append([])
+		# game board is three towers, each can have a varying number of "disk IDs" on it, starting at the bottom of the stack
+		for tower in range (0, 3):
+			self.towers.append([])
 		
-		# stack all the disks on the left post at first--starting with the largest disk on the bottom
+		# stack all the disks on the left tower at first--starting with the largest disk on the bottom
 		for disk in range (self.NumDisks, 0, -1):
-			self.posts[0].append(disk)
+			self.towers[0].append(disk)
 	
 	def is_end_game(self):
-		# are all disks on the rightmost post?
-		return len(self.posts[2]) == self.NumDisks
+		# are all disks on the rightmost tower?
+		return len(self.towers[2]) == self.NumDisks
 			
 	def _debug_print(self):
-		# debug method, show the contents of the posts
+		# debug method, show the contents of the towers
 		for i in range (0, 3):
-			print (self.posts[i])
+			print (self.towers[i])
 
 	def show(self):
 		if debug: self._debug_print()
 
 		print ('')
 
-		# for each vertical text printing row in the board printout, print what is at each post, horizontally
+		# for each vertical text printing row in the board printout, print what is at each tower, horizontally
 		for row in range(0, self.boardheight):
-			for post in range(0, 3):
-				self.show_disk(row, post)
+			for tower in range(0, 3):
+				self.show_disk(row, tower)
 			print ('');
 
-		# at the bottom of the board, below the posts, show a base for the board
-		print ((self.postwidth * 3 + 2) * "-")
-		#TODO:  label the posts with the numbers that are valid for user input
+		# at the bottom of the board, below the towers, show a base for the board
+		print ((self.towerwidth * 3 + 2) * "-")
+		#TODO:  label the towers with the numbers that are valid for user input
 		
-	def show_disk(self, row, post):
-		# if this post has enough disks to reach the current print row,
-		if row >= self.boardheight - len(self.posts[post]):
-			# then create a disk of proper width and center it on the post
-			disksize = self.posts[post][self.boardheight - 1 - row]
+	def show_disk(self, row, tower):
+		# if this tower has enough disks to reach the current print row,
+		if row >= self.boardheight - len(self.towers[tower]):
+			# then create a disk of proper width and center it on the tower
+			disksize = self.towers[tower][self.boardheight - 1 - row]
 			disk = "*"  * (1 + 2 * disksize)
 			print " " * (self.NumDisks - disksize) + disk + \
 							" " * (self.NumDisks - disksize),
 		else:
-			# this part of the post is empty, so show the post, centered in its space
+			# this part of the tower is empty, so show the tower, centered in its space
 			print " " * self.maxradius + "|" + " " * self.maxradius,
 		
-	def move_disk(self, frompost, topost):
-		if debug: print ("call move_disk: ", frompost, topost)
+	def move_disk(self, fromtower, totower):
+		if debug: print ("call move_disk: ", fromtower, totower)
 		
-		# check for a disk, if any, and its size, at the top of the stack on the "from" post
-		disk = self.top_disk_size(frompost)
+		# check for a disk, if any, and its size, at the top of the stack on the "from" tower
+		disk = self.top_disk_size(fromtower)
 		
 		if debug: print ("return: ", disk)
 		
 		if disk == None:
-			print ("There are no disks on that post to move!")
+			print ("There are no disks on that tower to move!")
 			return False
 
-		# check the size of the disk (if any) at the top of the stack on the "to" post
-		topdisk = self.top_disk_size(topost)
+		# check the size of the disk (if any) at the top of the stack on the "to" tower
+		topdisk = self.top_disk_size(totower)
 		
 		if debug: print ("return: ", topdisk)
 
@@ -79,25 +79,25 @@ class GameBoard(object):
 			print ("Can't move a disk onto a smaller one!")
 			return False
 
-		# move the disk to the new post
-		self.posts[frompost].pop()
-		self.posts[topost].append(disk)
+		# move the disk to the new tower
+		self.towers[fromtower].pop()
+		self.towers[totower].append(disk)
 		
 		# signal a successful move (no errors) so the caller can redraw the new board position
 		return True
 
-	def top_disk_size(self, post):
-		if debug: print ("call TopDisk: ", post)
+	def top_disk_size(self, tower):
+		if debug: print ("call TopDisk: ", tower)
 
-		# find the top disk on the post
-		numdisks = len(self.posts[post])
+		# find the top disk on the tower
+		numdisks = len(self.towers[tower])
 		if debug: print ("num disks:", numdisks)
 
 		# if a disk was found, return its size
 		if numdisks > 0:
-			return self.posts[post][numdisks-1]
+			return self.towers[tower][numdisks-1]
 		
-		# no disk was found on the post
+		# no disk was found on the tower
 		return None
 	
 def input_or_quit(prompt, min=None, max=None):
@@ -158,12 +158,12 @@ if __name__ == "__main__":
 
 	while (not board.is_end_game()):
 
-		frompost = input_or_quit("From post (q to quit)? ", 1, 3) - 1
-		topost = input_or_quit("To post (q to quit)? ", 1, 3) - 1
+		fromtower = input_or_quit("From tower (q to quit)? ", 1, 3) - 1
+		totower = input_or_quit("To tower (q to quit)? ", 1, 3) - 1
 
 		clear_screen()
 	
-		board.move_disk(frompost, topost)
+		board.move_disk(fromtower, totower)
 		board.show()
 
 	print "\n","*" * 20, "You did it!\n"
